@@ -1,0 +1,7 @@
+analysis/
+ref_T2Tunit/
+consensus/result
+consensus/vcfout
+consensus/bcftools_gatk/
+consensus/freebayes/
+```
