@@ -219,3 +219,18 @@ print(f"writing output_df to {output_file_prefix}internal_logpvalue.csv")
 # remove the rows with all NA except POS
 output_df = output_df.dropna(how="all", subset=output_df.columns[1:])
 output_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
+
+# POS vs SNV log p-value
+output_snv = output_df[["POS"] + [f"log_P_SNV({Bcell})" for Bcell in Bcell_IDlist]]
+output_snv = output_snv.dropna(how="all", subset=output_snv.columns[1:])
+output_snv.to_csv(f"{output_file_prefix}internal_logpvalue_SNV.csv", sep=',', index=False, na_rep="")
+
+# POS vs INS log p-value
+output_ins = output_df[["POS"] + [f"log_P_INS({Bcell})" for Bcell in Bcell_IDlist]]
+output_ins = output_ins.dropna(how="all", subset=output_ins.columns[1:])
+output_ins.to_csv(f"{output_file_prefix}internal_logpvalue_INS.csv", sep=',', index=False, na_rep="")
+# POS vs DEL log p-value
+output_del = output_df[["POS"] + [f"log_P_DEL({Bcell})" for Bcell in Bcell_IDlist]]
+output_del = output_del.dropna(how="all", subset=output_del.columns[1:])
+output_del.to_csv(f"{output_file_prefix}internal_logpvalue_DEL.csv", sep=',', index=False, na_rep="")
+
