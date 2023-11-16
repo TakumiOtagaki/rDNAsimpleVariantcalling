@@ -35,11 +35,12 @@ import glob
 import sys
 import pandas as pd
 import cstag
+from mystats import log_continuous_poisson
+
 from VariantCounter import VariantCounter
 
 min_rlen = 9000
 reflen = 13332
-
 
 
 
@@ -55,67 +56,6 @@ with open(Bcell_IDlist_file, "r") as f:
 # for test:
 Bcell_IDlist = Bcell_IDlist[:5]
 
-# # Define the Variant counter
-# class VariantCounter:
-#     # for each site(0, 1, ..., ref_len-1), count the number of variants
-#     # variant type: SNV, INS, DEL
-#     # and the read depth: DP
-#     def __init__(self, ref_len):
-#         self.ref_len = ref_len
-#         self.variant_count = [0] * ref_len
-#         self.variant_count_SNV = [0] * ref_len
-#         self.variant_count_INS = [0] * ref_len
-#         self.variant_count_DEL = [0] * ref_len
-#         self.DP = [0] * (ref_len + 1) # read depth 
-        
-#         # variant frequency
-#         self.SNV_freq = [0] * ref_len
-#         self.INS_freq = [0] * ref_len
-#         self.DEL_freq = [0] * ref_len
-#     def add_variant(self, variant_type, start, end):
-#         # variant_type: SNV, INS, DEL
-#         # start, end: 0-based
-#         # if variant_type == "SNV":
-#         if variant_type == "*":
-#             for i in range(start, end+1):
-#                 self.variant_count_SNV[i] += 1
-#         # elif variant_type == "INS":
-#         elif variant_type[0] == "+":
-#             # start should be equal to end
-#             for i in range(start, end+1):
-#                 self.variant_count_INS[i] += 1
-#         # elif variant_type == "DEL":
-#         elif variant_type == "-":
-#             for i in range(start, end+1):
-#                 self.variant_count_DEL[i] += 1
-#         elif variant_type == ":": # match
-#             pass
-#         else:
-#             print("Error: variant_type should be SNV, INS or DEL")
-#             sys.exit(1)
-#         for i in range(start, end+1):
-#             self.variant_count[i] += 1
-
-#     def add_DP(self, start, end):
-#         # start, end: 0-based
-#         for i in range(start, end+1):
-#         # for i in range(start, max(end+1, self.ref_len)):
-#             # ここでずるいことをしている。PAF では len = 13332 なのに
-#             # ref_start = 0 and ref_end = 13332 というマッピングがある。
-#             # そのリードの長さは 13333 になるはず。どういうこと？
-#             self.DP[i] += 1
-#     def print(self):
-#         print(self.variant_count)
-#         print(self.variant_count_SNV)
-#         print(self.variant_count_INS)
-#         print(self.variant_count_DEL)
-#         print(self.DP)
-
-#     def calc_freq(self):
-#         self.SNV_freq = [x / y for x, y in zip(self.variant_count_SNV, self.DP)]
-#         self.INS_freq = [x / y for x, y in zip(self.variant_count_INS, self.DP)]
-#         self.DEL_freq = [x / y for x, y in zip(self.variant_count_DEL, self.DP)]
-#         # print(self.SNV_freq)
 
 total_variant_counter = VariantCounter(reflen)
 
@@ -123,17 +63,18 @@ df_posfreq_vs_Bcell = pd.DataFrame(columns=["POS"])
 df_posfreq_vs_Bcell["POS"] = list(range(reflen))
 # df_posfreq_vs_Bcell will be like
     # position, SNV(B003), DEL(B003), INS(B003), SNV(B005), DEL(B005), INS(B005), ..., SNV(B_end), DEL(B_end), INS(B_end)
-# load the list of paf files
+
 
 # this process takes 1 sec for each step. 
     # this is slow but acceptable, so if affords to be slow, necessary to parallelize this process.
 for Bcell_ID in Bcell_IDlist:
     print("Bcell_ID: ", Bcell_ID)
     paf_file = f"/nfs/data05/otgk/rDNA/mapping/PSCA_mapping/ref=consensusmapping/mapping_result/{Bcell_ID}toCons.paf"
-    output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/{Bcell_ID}/internal_{Bcell_ID}toCons"
+    # output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/{Bcell_ID}/internal_{Bcell_ID}toCons"
+    output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/"
     graph_dir = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/{Bcell_ID}"
 
-    # ------------------------------------------- input -------------------------------------------
+    # ------------------------------------------- input processing -------------------------------------------
     # load the paf file and use only the columns of "cstag"(), "Target start on original strand (0-based)" and "Target end on original strand (0-based)", "Query start on original strand (0-based)", "Query end on original strand (0-based)", "Number of matching bases in the mapping", "Number bases in the mapping"
         # https://github.com/lh3/miniasm/blob/master/PAF.md
     paf_cs_df_ = pd.read_csv(paf_file, sep='\t', header=None, usecols=[7, 8, 22], names=[ "ref_start", "ref_end", "long_cstag"])
@@ -187,7 +128,6 @@ for Bcell_ID in Bcell_IDlist:
                 del_len = len(del_seq)
                 Bcell_variant_counter.add_variant("-", position, position + del_len - 1)
                 position += del_len
-
             elif cstag_type == "+":
                 # insertion
                 ins_seq = cstag_unit[1:]
@@ -231,8 +171,8 @@ for Bcell_ID in Bcell_IDlist:
 
 # ------------------------------------------- export -------------------------------------------
 # export the dataframe
-print(f"writing df_posfreq_vs_Bcell to {output_file_prefix}.vaf.csv")
-df_posfreq_vs_Bcell.to_csv(f"{output_file_prefix}.vaf.csv", sep=',', index=False)
+print(f"writing df_posfreq_vs_Bcell to {output_file_prefix}vaf.csv")
+df_posfreq_vs_Bcell.to_csv(f"{output_file_prefix}vaf.csv", sep=',', index=False)
 
 
 # ------------------------------------------- calculate the mean Variant Frequency for each site -------------------------------------------
@@ -248,4 +188,34 @@ mean_vaf_DEL = [sum(df_posfreq_vs_Bcell[f"DEL({Bcell_ID})"][j] for Bcell_ID in B
 
 # ------------------------------------------- calculate the log p-value for each site for each Bcell -------------------------------------------
 
-# output_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)"
+# output_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)" for Bcell_ID in Bcell_IDlist])
+output_df = pd.DataFrame(columns=["POS"])
+output_df["POS"] = list(range(reflen))
+
+# calculate the log p-value for each site for each Bcell
+for Bcell in Bcell_IDlist:
+    for variant_type in ["SNV", "INS", "DEL"]:
+        if variant_type == "SNV":
+            mean_vaf = mean_vaf_SNV
+        elif variant_type == "INS":
+            mean_vaf = mean_vaf_INS
+        elif variant_type == "DEL":
+            mean_vaf = mean_vaf_DEL
+        # poisson.log probability density function not probability mass function
+        output_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j], mean_vaf[j]) for j in range(reflen)]
+ 
+        # print(output_df.head())
+        # print(output_df.tail())
+        # 3 (num of variant) * 307 (num of Bcells) * 13332 (reflen) * 8 byte (float size) = 93 MB
+        # print(output_df.memory_usage(deep=True))
+        # print(output_df.info(memory_usage="deep"))
+        # print(output_df.memory_usage(deep=True).sum() / 1024**2, "MB")
+        # print(output_df.memory_usage(deep=True).sum() / 1024**3, "GB")
+        # print(output_df.memory_usage(deep=True).sum() / 1024**4, "TB")
+
+# ------------------------------------------- export -------------------------------------------
+print(f"writing output_df to {output_file_prefix}internal_logpvalue.csv")
+
+# remove the rows with all NA except POS
+output_df = output_df.dropna(how="all", subset=output_df.columns[1:])
+output_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
