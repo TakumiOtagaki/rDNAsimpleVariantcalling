@@ -59,3 +59,46 @@ class VariantCounter:
         self.INS_freq = [x / y for x, y in zip(self.variant_count_INS, self.DP)]
         self.DEL_freq = [x / y for x, y in zip(self.variant_count_DEL, self.DP)]
         # print(self.SNV_freq)
+    def to_csv(self, output_csv, samplename):
+        # columns: POS(1-based), SNV_COUNT, INS_COUNT, DEL_COUNT, DP, SNV_FREQ, INS_FREQ, DEL_FREQ
+        self.calc_freq()
+        with open(output_csv, "w") as f:
+            f.write(f"POS(1-based),SNV_COUNT,INS_COUNT,DEL_COUNT,DP,SNV_FREQ,INS_FREQ,DEL_FREQ\n")
+            for i in range(self.ref_len):
+                # print(f"{i+1},{self.variant_count_SNV[i]},{self.variant_count_INS[i]},{self.variant_count_DEL[i]},{self.DP[i]},{self.SNV_freq[i]},{self.INS_freq[i]},{self.DEL_freq[i]}")
+                f.write(f"{i},{self.variant_count_SNV[i]},{self.variant_count_INS[i]},{self.variant_count_DEL[i]},{self.DP[i]},{self.SNV_freq[i]},{self.INS_freq[i]},{self.DEL_freq[i]}\n")
+
+def load_cstag(parsed_cstag, ref_start, variant_counter):
+    position = ref_start
+    for cstag_unit in parsed_cstag:
+        cstag_type = cstag_unit[0]
+        # print(f"position: {position}, cstag_unit: {cstag_unit}")
+        
+        if cstag_type == ":":
+            # match
+            match_len = int(cstag_unit[1:])
+            position += match_len
+        elif cstag_type == "-":
+            # deletion
+            del_seq = cstag_unit[1:]
+            del_len = len(del_seq)
+            variant_counter.add_variant("-", position, position + del_len - 1)
+            position += del_len
+        elif cstag_type == "+":
+            # insertion
+            ins_seq = cstag_unit[1:]
+            ins_len = len(ins_seq)
+            variant_counter.add_variant("+", position, position)
+            # position += 1
+        elif cstag_type == "*":
+            # SNV
+            snv_unit = cstag_unit[1:]
+            # snv_before = snv_unit[0]
+            # snv_after = snv_unit[1]
+            variant_counter.add_variant("*", position, position)
+            position += 1
+        else:
+            print("Error: cstag_type should be :+-*")
+            sys.exit(1)
+
+    return variant_counter

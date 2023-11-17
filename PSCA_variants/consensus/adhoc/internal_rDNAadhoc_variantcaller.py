@@ -1,16 +1,31 @@
 # This program calculates the Variant Frequency of each variant in the Bcell (given ID).
 # Then, for each variant, it calculates the mean Variant Frequency of all Bcells.
 # Finally, for each variant, p-values is calculated by comparing the mean Variant Frequency with the Variant Frequency of the Bcell.
-    # Variant Frequency of variant j in Bcell i: VAF_ij
+    # Variant Frequency of variant j in Bcell i: VAF_ij (0 ~ 1)
     # VAF_ij ~ poisson(lambda_j)
-    # lambda_j = mean(VAF_ji) = mean(VAF_j1, VAF_j2, ..., VAF_jn)
-    # p_value_ij = poisson(VAF_ij, lambda_j)
-    # poisson(VAF_ij, lambda_j) = exp(-lambda_j) * lambda_j^VAF_ij / (VAF_ij)!
-        # VAF_ij: float
-        # So, (VAF_ij)! should be replaced with gamma(VAF_ij + 1)
+    # lambda_j = mean(VAF_ji) = mean(VAF_j1, VAF_j2, ..., VAF_jn) <- this is false;
+    # mu_j = mean(VAF_ji) = mean(VAF_j1, VAF_j2, ..., VAF_jn) <- Maximum Likelihood Estimation
+    # And then,
+    # lambda_j = mu_j * DP_ij
+
+    # p_value_ij = poisson(VariantCount_ij, lambda_j)
+    # poisson(VariantCount, lambda_j) = exp(-lambda_j) * lambda_j^VariantCount / (VariantCount)!
+        # VariantCount: float
+        # So, (VariantCount)! should be replaced with gamma(VariantCount + 1)
+
 # input: 
     # paf file
         # /nfs/data05/otgk/rDNA/mapping/PSCA_mapping/ref=consensusmapping/mapping_result/{Bcell_ID}toCons.paf
+        # with the cstag:
+            # short_cstag: string.
+            # cstag is:
+                # :n means n bases are matched
+                # -seq means seq bases are deleted
+                    # seq = [ATCG]+
+                # +seq means seq bases are inserted
+                    # seq = [ATCG]+
+                # *BeforeAfter means Before bases changed After bases (SNV)
+                    # Before, After = [ATCG]
     # output_file_prefix
         # /nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/
         # rather than 
@@ -36,12 +51,20 @@ import sys
 import pandas as pd
 import cstag
 from mystats import log_continuous_poisson
-
-from VariantCounter import VariantCounter
+from math import log
+from VariantCounter import VariantCounter, load_cstag
+import subprocess
+import gc
 
 min_rlen = 9000
 reflen = 13332
+output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/"
+graph_dir = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/"
 
+print("PROTECTION: Do you really want to run this script? again?(y/n) (It will takes 510 min to run this script))")
+if input() != "y":
+    print("exit")
+sys.exit()
 
 
 # load the Bcell ID list
@@ -54,39 +77,53 @@ with open(Bcell_IDlist_file, "r") as f:
 
 
 # for test:
-Bcell_IDlist = Bcell_IDlist[:5]
+# Bcell_IDlist = Bcell_IDlist
 
-
-total_variant_counter = VariantCounter(reflen)
-
-df_posfreq_vs_Bcell = pd.DataFrame(columns=["POS"])
-df_posfreq_vs_Bcell["POS"] = list(range(reflen))
-# df_posfreq_vs_Bcell will be like
-    # position, SNV(B003), DEL(B003), INS(B003), SNV(B005), DEL(B005), INS(B005), ..., SNV(B_end), DEL(B_end), INS(B_end)
 
 
 # this process takes 1 sec for each step. 
     # this is slow but acceptable, so if affords to be slow, necessary to parallelize this process.
+# Bcell_IDlist = ["B357"]
 for Bcell_ID in Bcell_IDlist:
     print("Bcell_ID: ", Bcell_ID)
     paf_file = f"/nfs/data05/otgk/rDNA/mapping/PSCA_mapping/ref=consensusmapping/mapping_result/{Bcell_ID}toCons.paf"
     # output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/{Bcell_ID}/internal_{Bcell_ID}toCons"
-    output_file_prefix = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/"
-    graph_dir = f"/nfs/data05/otgk/rDNA/variantcall/PSCA_variants/consensus/adhoc/result/{Bcell_ID}"
+
 
     # ------------------------------------------- input processing -------------------------------------------
     # load the paf file and use only the columns of "cstag"(), "Target start on original strand (0-based)" and "Target end on original strand (0-based)", "Query start on original strand (0-based)", "Query end on original strand (0-based)", "Number of matching bases in the mapping", "Number bases in the mapping"
         # https://github.com/lh3/miniasm/blob/master/PAF.md
-    paf_cs_df_ = pd.read_csv(paf_file, sep='\t', header=None, usecols=[7, 8, 22], names=[ "ref_start", "ref_end", "long_cstag"])
+    # print(pd.read_csv(paf_file, sep='\s+', header=None, usecols=[7,8,22,16] ).tail(50))
+    # paf_cs_df_ = pd.read_csv(paf_file, sep='\t', header=None, usecols=[7, 8, 22], names=[ "ref_start", "ref_end", "long_cstag"])
+    paf_cs_df_ = pd.read_csv(paf_file, sep='\s+', header=None, usecols=[7, 8, 16, 22], names=[ "ref_start", "ref_end", "tp", "long_cstag"])
+    paf_cs_df_ = paf_cs_df_[paf_cs_df_["tp"] == "tp:A:P"] # primay aligment
+    # print(paf_cs_df_.describe())
+    # print(paf_cs_df_[index = 3353])
+
+
+
     paf_cs_df_["rlen"] = paf_cs_df_["ref_end"] - paf_cs_df_["ref_start"]
     # paf_cs_df_["short_cstag"]: for each long_cstag, apply "cstag.shorten(long_cstag)"
+
     paf_cs_df_["short_cstag"] = paf_cs_df_["long_cstag"].apply(cstag.shorten)
+    # # for debug, avoid using apply:
+    # for i in range(len(paf_cs_df_)):
+    #     try:
+    #         paf_cs_df_.at[i, "short_cstag"] = cstag.shorten(paf_cs_df_.at[i, "long_cstag"])
+    #     except:
+    #         print(i, "/", len(paf_cs_df_))
+    #         print("long_cstag: ", paf_cs_df_.at[i, "long_cstag"])
+            
+        # if paf_cs_df_.at[i, "short_cstag"] is none:
+    # sys.exit()
     # print(paf_cs_df_.head())
+
 
     # extract the entries with rlen >= min_rlen
     paf_cs_df = paf_cs_df_[paf_cs_df_["rlen"] >= min_rlen]
-    paf_cs_df = paf_cs_df.drop(columns=["long_cstag", "rlen"])
-    # print(paf_cs_df.head())
+    paf_cs_df = paf_cs_df.drop(columns=["long_cstag", "rlen", "tp"])
+    del paf_cs_df_
+    gc.collect()
 
 
     # ------------------------------------------- caluculate Variant count for each site and DP -------------------------------------------
@@ -94,85 +131,71 @@ for Bcell_ID in Bcell_IDlist:
     # for each site, judge if there is a variant and accumulate the read depth
     for ref_start, ref_end, short_cstag in paf_cs_df.values:
         # ref_start, ref_end: 0-based integer
-        # short_cstag: string.
-            # cstag is:
-                # :n means n bases are matched
-                # -seq means seq bases are deleted
-                    # seq = [ATCG]+
-                # +seq means seq bases are inserted
-                    # seq = [ATCG]+
-                # *BeforeAfter means Before bases changed After bases (SNV)
-                    # Before, After = [ATCG]
+
         # ~~~~~~~~~~~~~ 1. add DP: ~~~~~~~~~~~~~
         Bcell_variant_counter.add_DP(ref_start, ref_end)
 
-
         # ~~~~~~~~~~~~~ 2. manipulate the short_cstag ~~~~~~~~~~~~~
-        # parse the short_cstag
-        parsed_cstag = cstag.split(short_cstag)
-        # print(parsed_cstag)
-
-        # read the cstag
-        position = ref_start
-        for cstag_unit in parsed_cstag:
-            cstag_type = cstag_unit[0]
-            # print(f"position: {position}, cstag_unit: {cstag_unit}")
-            
-            if cstag_type == ":":
-                # match
-                match_len = int(cstag_unit[1:])
-                position += match_len
-            elif cstag_type == "-":
-                # deletion
-                del_seq = cstag_unit[1:]
-                del_len = len(del_seq)
-                Bcell_variant_counter.add_variant("-", position, position + del_len - 1)
-                position += del_len
-            elif cstag_type == "+":
-                # insertion
-                ins_seq = cstag_unit[1:]
-                ins_len = len(ins_seq)
-                Bcell_variant_counter.add_variant("+", position, position)
-                # position += 1
-            elif cstag_type == "*":
-                # SNV
-                snv_unit = cstag_unit[1:]
-                # snv_before = snv_unit[0]
-                # snv_after = snv_unit[1]
-                Bcell_variant_counter.add_variant("*", position, position)
-                position += 1
-            else:
-                print("Error: cstag_type should be :+-*")
-                sys.exit(1)
-        # print("END with the position: ", position)
-            
-    # ~~~~~~~~~ 3. add the Bcell_variant_counter to the total_variant_counter ~~~~~~~~~~~
-    total_variant_counter.variant_count = [x + y for x, y in zip(total_variant_counter.variant_count, Bcell_variant_counter.variant_count)]
-    total_variant_counter.variant_count_SNV = [x + y for x, y in zip(total_variant_counter.variant_count_SNV, Bcell_variant_counter.variant_count_SNV)]
-    total_variant_counter.variant_count_INS = [x + y for x, y in zip(total_variant_counter.variant_count_INS, Bcell_variant_counter.variant_count_INS)]
-    total_variant_counter.variant_count_DEL = [x + y for x, y in zip(total_variant_counter.variant_count_DEL, Bcell_variant_counter.variant_count_DEL)]
-    total_variant_counter.DP = [x + y for x, y in zip(total_variant_counter.DP, Bcell_variant_counter.DP)]
-    # total_variant_counter.print()
+        # read the parsed_cstag(=splitted_cstag) from the short_cstag
+        Bcell_variant_counter = load_cstag(cstag.split(short_cstag), ref_start, Bcell_variant_counter)
+    
+    # export the Bcell_variant_counter.
+    Bcell_variant_counter.to_csv(f"{output_file_prefix}result/{Bcell_ID}/{Bcell_ID}2Cons.variant.csv", Bcell_ID)
 
 
     # ------------------------------------------- calculate the Variant Frequency and p-value for each site -------------------------------------------
     # calculate the Variant Frequenc (for each ) in the Bcell we are looking at
     Bcell_variant_counter.calc_freq()
-    # print(Bcell_variant_counter.SNV_freq)
 
-    # ------------------------------------------- concat dataframe -------------------------------------------
-    df_posfreq_vs_Bcell[f"SNV({Bcell_ID})"] = Bcell_variant_counter.SNV_freq
-    df_posfreq_vs_Bcell[f"INS({Bcell_ID})"] = Bcell_variant_counter.INS_freq
-    df_posfreq_vs_Bcell[f"DEL({Bcell_ID})"] = Bcell_variant_counter.DEL_freq
-    # print(df_posfreq_vs_Bcell.head())
-    # print(df_posfreq_vs_Bcell.tail())
-    # 3 (num of variant) * 307 (num of Bcells) * 13332 (reflen) * 8 byte (float size) = 93 MB
+
+# memory free:
+del paf_cs_df, Bcell_variant_counter
+gc.collect()
+
+
+
+samples_vs_SNV_count = pd.DataFrame(columns=["POS"])
+samples_vs_INS_count = pd.DataFrame(columns=["POS"])
+samples_vs_DEL_count = pd.DataFrame(columns=["POS"])
+samples_vs_DP = pd.DataFrame(columns=["POS"])
+
+samples_vs_SNV_count["POS"] = list(range(reflen))
+samples_vs_INS_count["POS"] = list(range(reflen))
+samples_vs_DEL_count["POS"] = list(range(reflen))
+samples_vs_DP["POS"] = list(range(reflen))
+
+for Bcell_ID in Bcell_IDlist:
+    samples_vs_SNV_count[f"{Bcell_ID}"] = pd.read_csv(f"{output_file_prefix}result/{Bcell_ID}/{Bcell_ID}2Cons.variant.csv", sep=',', header=0, )["SNV_COUNT"]
+    samples_vs_INS_count[f"{Bcell_ID}"] = pd.read_csv(f"{output_file_prefix}result/{Bcell_ID}/{Bcell_ID}2Cons.variant.csv", sep=',', header=0,)["INS_COUNT"]
+    samples_vs_DEL_count[f"{Bcell_ID}"] = pd.read_csv(f"{output_file_prefix}result/{Bcell_ID}/{Bcell_ID}2Cons.variant.csv", sep=',', header=0,)["DEL_COUNT"]
+    samples_vs_DP[f"{Bcell_ID}"] = pd.read_csv(f"{output_file_prefix}result/{Bcell_ID}/{Bcell_ID}2Cons.variant.csv", sep=',', header=0,)["DP"]
+
+samples_vs_SNV_freq = samples_vs_SNV_count.drop(columns=["POS"]) / samples_vs_DP.drop(columns=["POS"])
+samples_vs_INS_freq = samples_vs_INS_count.drop(columns=["POS"]) / samples_vs_DP.drop(columns=["POS"])
+samples_vs_DEL_freq = samples_vs_DEL_count.drop(columns=["POS"]) / samples_vs_DP.drop(columns=["POS"])
+
+samples_vs_SNV_freq["POS"] = list(range(reflen))
+samples_vs_INS_freq["POS"] = list(range(reflen))
+samples_vs_DEL_freq["POS"] = list(range(reflen))
+
+print(samples_vs_SNV_freq.head())
+print("shape of samples_vs_SNV_freq: ", samples_vs_SNV_freq.shape)
 
 
 # ------------------------------------------- export -------------------------------------------
 # export the dataframe
-print(f"writing df_posfreq_vs_Bcell to {output_file_prefix}vaf.csv")
-df_posfreq_vs_Bcell.to_csv(f"{output_file_prefix}vaf.csv", sep=',', index=False)
+# print(f"writing df_posfreq_vs_Bcell to {output_file_prefix}vaf.csv")
+# df_posfreq_vs_Bcell.to_csv(f"{output_file_prefix}vaf.csv", sep=',', index=False) #--> this is memory consuming, have to be improved.
+
+samples_vs_SNV_count.to_csv(f"{output_file_prefix}POSvsBcellSNVcount.csv", sep=',', index=False)
+samples_vs_INS_count.to_csv(f"{output_file_prefix}POSvsBcellINScount.csv", sep=',', index=False)
+samples_vs_DEL_count.to_csv(f"{output_file_prefix}POSvsBcellDELcount.csv", sep=',', index=False)
+samples_vs_DP.to_csv(f"{output_file_prefix}POSvsBcellDP.csv", sep=',', index=False)
+
+samples_vs_SNV_freq.to_csv(f"{output_file_prefix}POSvsBcellSNVfreq.csv", sep=',', index=False)
+samples_vs_INS_freq.to_csv(f"{output_file_prefix}POSvsBcellINSfreq.csv", sep=',', index=False)
+samples_vs_DEL_freq.to_csv(f"{output_file_prefix}POSvsBcellDELfreq.csv", sep=',', index=False)
+
 
 
 # ------------------------------------------- calculate the mean Variant Frequency for each site -------------------------------------------
@@ -181,56 +204,175 @@ df_posfreq_vs_Bcell.to_csv(f"{output_file_prefix}vaf.csv", sep=',', index=False)
 
 
 
-mean_vaf_SNV = [sum(df_posfreq_vs_Bcell[f"SNV({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
-mean_vaf_INS = [sum(df_posfreq_vs_Bcell[f"INS({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
-mean_vaf_DEL = [sum(df_posfreq_vs_Bcell[f"DEL({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
+# mean_vaf_SNV = [sum(df_posfreq_vs_Bcell[f"SNV({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
+# mean_vaf_INS = [sum(df_posfreq_vs_Bcell[f"INS({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
+# mean_vaf_DEL = [sum(df_posfreq_vs_Bcell[f"DEL({Bcell_ID})"][j] for Bcell_ID in Bcell_IDlist) / len(Bcell_IDlist) for j in range(reflen)]
+# using numpy, instead of above code:
+# mean vaf: (sum_i (VAF_ij)) / len(Bcell_IDlist)
+import numpy as np
+
+mean_vaf_SNV = np.mean(samples_vs_SNV_freq.drop(columns=["POS"]).values, axis=1)
+mean_vaf_INS = np.mean(samples_vs_INS_freq.drop(columns=["POS"]).values, axis=1)
+mean_vaf_DEL = np.mean(samples_vs_DEL_freq.drop(columns=["POS"]).values, axis=1)
+
+del samples_vs_SNV_freq, samples_vs_INS_freq, samples_vs_DEL_freq
+gc.collect()
+
+
 
 
 # ------------------------------------------- calculate the log p-value for each site for each Bcell -------------------------------------------
 
-# output_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)" for Bcell_ID in Bcell_IDlist])
-output_df = pd.DataFrame(columns=["POS"])
-output_df["POS"] = list(range(reflen))
+# pvalue_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)" for Bcell_ID in Bcell_IDlist])
+pvalue_df = pd.DataFrame(columns=["POS"])
+pvalue_df["POS"] = list(range(reflen))
 
 # calculate the log p-value for each site for each Bcell
 for Bcell in Bcell_IDlist:
+    # poisson.log probability density function not probability mass function
+    # pvalue_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j], mean_vaf[j]) for j in range(reflen)]
+    # log_p_value = log_continious_poisson(VariantCount_ij, mean_j * DP_ij): not VariantFrequency but VariantCount
+    # pvalue_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j] * DP_df[f"DP({Bcell})"][j], mean_vaf[j] * DP_df[f"DP({Bcell})"][j]) for j in range(reflen)]
+ 
     for variant_type in ["SNV", "INS", "DEL"]:
         if variant_type == "SNV":
             mean_vaf = mean_vaf_SNV
+            pvalue_df[f"log_P_SNV({Bcell})"] = [log_continuous_poisson(samples_vs_SNV_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
         elif variant_type == "INS":
             mean_vaf = mean_vaf_INS
+            pvalue_df[f"log_P_INS({Bcell})"] = [log_continuous_poisson(samples_vs_INS_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
         elif variant_type == "DEL":
             mean_vaf = mean_vaf_DEL
-        # poisson.log probability density function not probability mass function
-        output_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j], mean_vaf[j]) for j in range(reflen)]
- 
-        # print(output_df.head())
-        # print(output_df.tail())
-        # 3 (num of variant) * 307 (num of Bcells) * 13332 (reflen) * 8 byte (float size) = 93 MB
-        # print(output_df.memory_usage(deep=True))
-        # print(output_df.info(memory_usage="deep"))
-        # print(output_df.memory_usage(deep=True).sum() / 1024**2, "MB")
-        # print(output_df.memory_usage(deep=True).sum() / 1024**3, "GB")
-        # print(output_df.memory_usage(deep=True).sum() / 1024**4, "TB")
+            pvalue_df[f"log_P_DEL({Bcell})"] = [log_continuous_poisson(samples_vs_DEL_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
 
+  
 # ------------------------------------------- export -------------------------------------------
-print(f"writing output_df to {output_file_prefix}internal_logpvalue.csv")
+print(f"writing pvalue_df to {output_file_prefix}internal_logpvalue.csv")
 
 # remove the rows with all NA except POS
-output_df = output_df.dropna(how="all", subset=output_df.columns[1:])
-output_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
+# pvalue_df = pvalue_df.dropna(how="all", subset=pvalue_df.columns[1:])
+pvalue_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
 
 # POS vs SNV log p-value
-output_snv = output_df[["POS"] + [f"log_P_SNV({Bcell})" for Bcell in Bcell_IDlist]]
-output_snv = output_snv.dropna(how="all", subset=output_snv.columns[1:])
+output_snv = pvalue_df[["POS"] + [f"log_P_SNV({Bcell})" for Bcell in Bcell_IDlist]]
+# output_snv = output_snv.dropna(how="all", subset=output_snv.columns[1:])
 output_snv.to_csv(f"{output_file_prefix}internal_logpvalue_SNV.csv", sep=',', index=False, na_rep="")
 
 # POS vs INS log p-value
-output_ins = output_df[["POS"] + [f"log_P_INS({Bcell})" for Bcell in Bcell_IDlist]]
-output_ins = output_ins.dropna(how="all", subset=output_ins.columns[1:])
+output_ins = pvalue_df[["POS"] + [f"log_P_INS({Bcell})" for Bcell in Bcell_IDlist]]
+# output_ins = output_ins.dropna(how="all", subset=output_ins.columns[1:])
 output_ins.to_csv(f"{output_file_prefix}internal_logpvalue_INS.csv", sep=',', index=False, na_rep="")
 # POS vs DEL log p-value
-output_del = output_df[["POS"] + [f"log_P_DEL({Bcell})" for Bcell in Bcell_IDlist]]
-output_del = output_del.dropna(how="all", subset=output_del.columns[1:])
+output_del = pvalue_df[["POS"] + [f"log_P_DEL({Bcell})" for Bcell in Bcell_IDlist]]
+# output_del = output_del.dropna(how="all", subset=output_del.columns[1:])
 output_del.to_csv(f"{output_file_prefix}internal_logpvalue_DEL.csv", sep=',', index=False, na_rep="")
+
+
+# ------------------------------------------- plot -------------------------------------------
+# plot the pvalue
+
+import matplotlib.pyplot as plt
+
+# for each position j, plot the min_{Bcells i}(log_value_ij) vs j
+
+# use subplot and plot 
+    # 1. snv: pos vs min_{Bcells i}(log_value_ij)
+    # 2. ins: pos vs min_{Bcells i}(log_value_ij)
+    # 3. del: pos vs min_{Bcells i}(log_value_ij)
+    # 4. 3 plots in the same figure (different colors)
+    # * all figure have the y = log(0.05 / len(Bcell_list) / len(variant))
+    # in total, there are 4 figures
+alpha = 0.05
+fig = plt.figure(figsize=(22, 12))
+
+log_alpha_limit = \
+ log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"])))
+
+ax1 = fig.add_subplot(2, 2, 1)
+ax1.set_title("SNV")
+ax1.set_xlabel("position")
+ax1.set_ylabel("min(log_p_value)")
+# ax1.set_ylim(-10, 0)
+ax1.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]])
+ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
+ax1.legend(loc = "upper left")
+
+ax2 = fig.add_subplot(2, 2, 2)
+ax2.set_title("INS")
+ax2.set_xlabel("position")
+ax2.set_ylabel("min(log_p_value)")
+# ax2.set_ylim(-10, 0)
+ax2.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]])
+ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
+ax2.legend(loc = "upper left")
+
+ax3 = fig.add_subplot(2, 2, 3)
+ax3.set_title("DEL")
+ax3.set_xlabel("position")
+ax3.set_ylabel("min(log_p_value)")
+# ax3.set_ylim(-10, 0)
+ax3.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]])
+ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
+ax3.legend(loc = "upper left")
+
+
+ax4 = fig.add_subplot(2, 2, 4)
+ax4.set_title("SNV, INS, DEL")
+ax4.set_xlabel("position")
+ax4.set_ylabel("min(log_p_value)")
+# ax4.set_ylim(-10, 0)
+ax4.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]], label="SNV")
+ax4.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]], label="INS")
+ax4.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]], label="DEL")
+ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
+ax4.legend(loc = "upper left")
+
+
+# save
+fig.savefig(f"{graph_dir}internal_minlogpvalue.png")
+print(f"{graph_dir}internal_minlogpvalue.png is saved")
+
+
+# the same plot but the y should be median(log_p_value) instead of min(log_p_value)
+
+fig = plt.figure(figsize=(22, 12))
+fig.suptitle(f"median(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ")
+
+ax1 = fig.add_subplot(2, 2, 1)
+ax1.set_title("SNV")
+ax1.set_xlabel("position")
+ax1.set_ylabel("median(log_p_value)")
+ax1.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]])
+ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
+ax1.legend(loc = "upper left")
+
+ax2 = fig.add_subplot(2, 2, 2)
+ax2.set_title("INS")
+ax2.set_xlabel("position")
+ax2.set_ylabel("median(log_p_value)")
+ax2.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]])
+ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
+ax2.legend(loc = "upper left")
+
+ax3 = fig.add_subplot(2, 2, 3)
+ax3.set_title("DEL")
+ax3.set_xlabel("position")
+ax3.set_ylabel("median(log_p_value)")
+ax3.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]])
+ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
+ax3.legend(loc = "upper left")
+
+ax4 = fig.add_subplot(2, 2, 4)
+ax4.set_title("SNV, INS, DEL")
+ax4.set_xlabel("position")
+ax4.set_ylabel("median(log_p_value)")
+ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]], label="SNV")
+ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]], label="INS")
+ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]], label="DEL")
+ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
+ax4.legend(loc = "upper left")
+
+# save
+fig.savefig(f"{graph_dir}internal_medianlogpvalue.png")
+print(f"{graph_dir}internal_medianlogpvalue.png is saved")
 
