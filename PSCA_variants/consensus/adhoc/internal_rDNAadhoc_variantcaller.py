@@ -221,158 +221,158 @@ gc.collect()
 
 
 
-# ------------------------------------------- calculate the log p-value for each site for each Bcell -------------------------------------------
+# ------------------------------------------- calculate the log prob for each site for each Bcell -------------------------------------------
 
-# pvalue_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)" for Bcell_ID in Bcell_IDlist])
-pvalue_df = pd.DataFrame(columns=["POS"])
-pvalue_df["POS"] = list(range(reflen))
+# prob_df = pd.DataFrame(columns=["POS", "log_P_SNV(Bcell_ID)", "log_P_INS(Bcell_ID)", "log_P_DEL(Bcell_ID)" for Bcell_ID in Bcell_IDlist])
+prob_df = pd.DataFrame(columns=["POS"])
+prob_df["POS"] = list(range(reflen))
 
 # calculate the log p-value for each site for each Bcell
 for Bcell in Bcell_IDlist:
     # poisson.log probability density function not probability mass function
-    # pvalue_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j], mean_vaf[j]) for j in range(reflen)]
+    # prob_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j], mean_vaf[j]) for j in range(reflen)]
     # log_p_value = log_continious_poisson(VariantCount_ij, mean_j * DP_ij): not VariantFrequency but VariantCount
-    # pvalue_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j] * DP_df[f"DP({Bcell})"][j], mean_vaf[j] * DP_df[f"DP({Bcell})"][j]) for j in range(reflen)]
+    # prob_df[f"log_P_{variant_type}({Bcell})"] = [log_continuous_poisson(df_posfreq_vs_Bcell[f"{variant_type}({Bcell})"][j] * DP_df[f"DP({Bcell})"][j], mean_vaf[j] * DP_df[f"DP({Bcell})"][j]) for j in range(reflen)]
  
     for variant_type in ["SNV", "INS", "DEL"]:
         if variant_type == "SNV":
             mean_vaf = mean_vaf_SNV
-            pvalue_df[f"log_P_SNV({Bcell})"] = [log_continuous_poisson(samples_vs_SNV_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
+            prob_df[f"log_P_SNV({Bcell})"] = [log_continuous_poisson(samples_vs_SNV_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
         elif variant_type == "INS":
             mean_vaf = mean_vaf_INS
-            pvalue_df[f"log_P_INS({Bcell})"] = [log_continuous_poisson(samples_vs_INS_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
+            prob_df[f"log_P_INS({Bcell})"] = [log_continuous_poisson(samples_vs_INS_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
         elif variant_type == "DEL":
             mean_vaf = mean_vaf_DEL
-            pvalue_df[f"log_P_DEL({Bcell})"] = [log_continuous_poisson(samples_vs_DEL_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
+            prob_df[f"log_P_DEL({Bcell})"] = [log_continuous_poisson(samples_vs_DEL_count[f"{Bcell}"][j], mean_vaf[j] * samples_vs_DP[f"{Bcell}"][j]) for j in range(reflen)]
 
   
 # ------------------------------------------- export -------------------------------------------
-print(f"writing pvalue_df to {output_file_prefix}internal_logpvalue.csv")
+print(f"writing prob_df to {output_file_prefix}internal_logpvalue.csv")
 
 # remove the rows with all NA except POS
-# pvalue_df = pvalue_df.dropna(how="all", subset=pvalue_df.columns[1:])
-pvalue_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
+# prob_df = prob_df.dropna(how="all", subset=prob_df.columns[1:])
+prob_df.to_csv(f"{output_file_prefix}internal_logpvalue.csv", sep=',', index=False, na_rep="")
 
 # POS vs SNV log p-value
-output_snv = pvalue_df[["POS"] + [f"log_P_SNV({Bcell})" for Bcell in Bcell_IDlist]]
+output_snv = prob_df[["POS"] + [f"log_P_SNV({Bcell})" for Bcell in Bcell_IDlist]]
 # output_snv = output_snv.dropna(how="all", subset=output_snv.columns[1:])
 output_snv.to_csv(f"{output_file_prefix}internal_logpvalue_SNV.csv", sep=',', index=False, na_rep="")
 
 # POS vs INS log p-value
-output_ins = pvalue_df[["POS"] + [f"log_P_INS({Bcell})" for Bcell in Bcell_IDlist]]
+output_ins = prob_df[["POS"] + [f"log_P_INS({Bcell})" for Bcell in Bcell_IDlist]]
 # output_ins = output_ins.dropna(how="all", subset=output_ins.columns[1:])
 output_ins.to_csv(f"{output_file_prefix}internal_logpvalue_INS.csv", sep=',', index=False, na_rep="")
 # POS vs DEL log p-value
-output_del = pvalue_df[["POS"] + [f"log_P_DEL({Bcell})" for Bcell in Bcell_IDlist]]
+output_del = prob_df[["POS"] + [f"log_P_DEL({Bcell})" for Bcell in Bcell_IDlist]]
 # output_del = output_del.dropna(how="all", subset=output_del.columns[1:])
 output_del.to_csv(f"{output_file_prefix}internal_logpvalue_DEL.csv", sep=',', index=False, na_rep="")
 
 
-# ------------------------------------------- plot -------------------------------------------
-# plot the pvalue
+# # ------------------------------------------- plot -------------------------------------------
+# # plot the pvalue
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-# for each position j, plot the min_{Bcells i}(log_value_ij) vs j
+# # for each position j, plot the min_{Bcells i}(log_value_ij) vs j
 
-# use subplot and plot 
-    # 1. snv: pos vs min_{Bcells i}(log_value_ij)
-    # 2. ins: pos vs min_{Bcells i}(log_value_ij)
-    # 3. del: pos vs min_{Bcells i}(log_value_ij)
-    # 4. 3 plots in the same figure (different colors)
-    # * all figure have the y = log(0.05 / len(Bcell_list) / len(variant))
-    # in total, there are 4 figures
-alpha = 0.05
-fig = plt.figure(figsize=(22, 12))
+# # use subplot and plot 
+#     # 1. snv: pos vs min_{Bcells i}(log_value_ij)
+#     # 2. ins: pos vs min_{Bcells i}(log_value_ij)
+#     # 3. del: pos vs min_{Bcells i}(log_value_ij)
+#     # 4. 3 plots in the same figure (different colors)
+#     # * all figure have the y = log(0.05 / len(Bcell_list) / len(variant))
+#     # in total, there are 4 figures
+# alpha = 0.05
+# fig = plt.figure(figsize=(22, 12))
 
-log_alpha_limit = \
- log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"])))
+# log_alpha_limit = \
+#  log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"])))
 
-ax1 = fig.add_subplot(2, 2, 1)
-ax1.set_title("SNV")
-ax1.set_xlabel("position")
-ax1.set_ylabel("min(log_p_value)")
-# ax1.set_ylim(-10, 0)
-ax1.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]])
-ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
-ax1.legend(loc = "upper left")
+# ax1 = fig.add_subplot(2, 2, 1)
+# ax1.set_title("SNV")
+# ax1.set_xlabel("position")
+# ax1.set_ylabel("min(log_p_value)")
+# # ax1.set_ylim(-10, 0)
+# ax1.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]])
+# ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
+# ax1.legend(loc = "upper left")
 
-ax2 = fig.add_subplot(2, 2, 2)
-ax2.set_title("INS")
-ax2.set_xlabel("position")
-ax2.set_ylabel("min(log_p_value)")
-# ax2.set_ylim(-10, 0)
-ax2.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]])
-ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
-ax2.legend(loc = "upper left")
+# ax2 = fig.add_subplot(2, 2, 2)
+# ax2.set_title("INS")
+# ax2.set_xlabel("position")
+# ax2.set_ylabel("min(log_p_value)")
+# # ax2.set_ylim(-10, 0)
+# ax2.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]])
+# ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
+# ax2.legend(loc = "upper left")
 
-ax3 = fig.add_subplot(2, 2, 3)
-ax3.set_title("DEL")
-ax3.set_xlabel("position")
-ax3.set_ylabel("min(log_p_value)")
-# ax3.set_ylim(-10, 0)
-ax3.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]])
-ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
-ax3.legend(loc = "upper left")
-
-
-ax4 = fig.add_subplot(2, 2, 4)
-ax4.set_title("SNV, INS, DEL")
-ax4.set_xlabel("position")
-ax4.set_ylabel("min(log_p_value)")
-# ax4.set_ylim(-10, 0)
-ax4.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]], label="SNV")
-ax4.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]], label="INS")
-ax4.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]], label="DEL")
-ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
-ax4.legend(loc = "upper left")
+# ax3 = fig.add_subplot(2, 2, 3)
+# ax3.set_title("DEL")
+# ax3.set_xlabel("position")
+# ax3.set_ylabel("min(log_p_value)")
+# # ax3.set_ylim(-10, 0)
+# ax3.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]])
+# ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
+# ax3.legend(loc = "upper left")
 
 
-# save
-fig.savefig(f"{graph_dir}internal_minlogpvalue.png")
-print(f"{graph_dir}internal_minlogpvalue.png is saved")
+# ax4 = fig.add_subplot(2, 2, 4)
+# ax4.set_title("SNV, INS, DEL")
+# ax4.set_xlabel("position")
+# ax4.set_ylabel("min(log_p_value)")
+# # ax4.set_ylim(-10, 0)
+# ax4.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]], label="SNV")
+# ax4.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]], label="INS")
+# ax4.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]], label="DEL")
+# ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
+# ax4.legend(loc = "upper left")
 
 
-# the same plot but the y should be median(log_p_value) instead of min(log_p_value)
+# # save
+# fig.savefig(f"{graph_dir}internal_minlogpvalue.png")
+# print(f"{graph_dir}internal_minlogpvalue.png is saved")
 
-fig = plt.figure(figsize=(22, 12))
-fig.suptitle(f"median(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ")
 
-ax1 = fig.add_subplot(2, 2, 1)
-ax1.set_title("SNV")
-ax1.set_xlabel("position")
-ax1.set_ylabel("median(log_p_value)")
-ax1.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]])
-ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
-ax1.legend(loc = "upper left")
+# # the same plot but the y should be median(log_p_value) instead of min(log_p_value)
 
-ax2 = fig.add_subplot(2, 2, 2)
-ax2.set_title("INS")
-ax2.set_xlabel("position")
-ax2.set_ylabel("median(log_p_value)")
-ax2.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]])
-ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
-ax2.legend(loc = "upper left")
+# fig = plt.figure(figsize=(22, 12))
+# fig.suptitle(f"median(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ")
 
-ax3 = fig.add_subplot(2, 2, 3)
-ax3.set_title("DEL")
-ax3.set_xlabel("position")
-ax3.set_ylabel("median(log_p_value)")
-ax3.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]])
-ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
-ax3.legend(loc = "upper left")
+# ax1 = fig.add_subplot(2, 2, 1)
+# ax1.set_title("SNV")
+# ax1.set_xlabel("position")
+# ax1.set_ylabel("median(log_p_value)")
+# ax1.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]])
+# ax1.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_snv["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(snv_variant))")
+# ax1.legend(loc = "upper left")
 
-ax4 = fig.add_subplot(2, 2, 4)
-ax4.set_title("SNV, INS, DEL")
-ax4.set_xlabel("position")
-ax4.set_ylabel("median(log_p_value)")
-ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]], label="SNV")
-ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]], label="INS")
-ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]], label="DEL")
-ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
-ax4.legend(loc = "upper left")
+# ax2 = fig.add_subplot(2, 2, 2)
+# ax2.set_title("INS")
+# ax2.set_xlabel("position")
+# ax2.set_ylabel("median(log_p_value)")
+# ax2.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]])
+# ax2.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_ins["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(ins_variant))")
+# ax2.legend(loc = "upper left")
 
-# save
-fig.savefig(f"{graph_dir}internal_medianlogpvalue.png")
-print(f"{graph_dir}internal_medianlogpvalue.png is saved")
+# ax3 = fig.add_subplot(2, 2, 3)
+# ax3.set_title("DEL")
+# ax3.set_xlabel("position")
+# ax3.set_ylabel("median(log_p_value)")
+# ax3.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]])
+# ax3.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log(len(output_del["POS"])), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(del_variant))")
+# ax3.legend(loc = "upper left")
+
+# ax4 = fig.add_subplot(2, 2, 4)
+# ax4.set_title("SNV, INS, DEL")
+# ax4.set_xlabel("position")
+# ax4.set_ylabel("median(log_p_value)")
+# ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]], label="SNV")
+# ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]], label="INS")
+# ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]], label="DEL")
+# ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
+# ax4.legend(loc = "upper left")
+
+# # save
+# fig.savefig(f"{graph_dir}internal_medianlogpvalue.png")
+# print(f"{graph_dir}internal_medianlogpvalue.png is saved")
 

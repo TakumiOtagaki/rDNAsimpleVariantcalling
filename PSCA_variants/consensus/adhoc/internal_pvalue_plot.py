@@ -62,7 +62,7 @@ with open(Bcell_IDlist_file, "r") as f:
     # in total, there are 4 figures
 alpha = 0.05
 fig = plt.figure(figsize=(22, 12))
-fig.suptitle(f"min(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ")
+fig.suptitle(f"min(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ", fontsize=20)
 
 log_alpha_limit = \
  log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"])))
@@ -96,13 +96,13 @@ ax3.legend(loc = "upper left")
 
 
 ax4 = fig.add_subplot(2, 2, 4)
-ax4.set_title("SNV, INS, DEL")
+ax4.set_title("SNV, INS, DEL", fontsize=20)
 ax4.set_xlabel("position")
 ax4.set_ylabel("min(log_p_value)")
 # ax4.set_ylim(-10, 0)
-ax4.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]], label="SNV")
-ax4.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]], label="INS")
-ax4.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]], label="DEL")
+ax4.scatter(output_snv["POS"], [min([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_snv["POS"]], label="SNV", alpha = 0.7)
+ax4.scatter(output_ins["POS"], [min([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_ins["POS"]], label="INS", alpha = 0.7)
+ax4.scatter(output_del["POS"], [min([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist]) for j in output_del["POS"]], label="DEL", alpha = 0.7)
 ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
 ax4.legend(loc = "upper left")
 
@@ -145,9 +145,9 @@ ax4 = fig.add_subplot(2, 2, 4)
 ax4.set_title("SNV, INS, DEL")
 ax4.set_xlabel("position")
 ax4.set_ylabel("median(log_p_value)")
-ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]], label="SNV")
-ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]], label="INS")
-ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]], label="DEL")
+ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_snv["POS"]], label="SNV", alpha = 0.7)
+ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_ins["POS"]], label="INS", alpha = 0.7)
+ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 2] for j in output_del["POS"]], label="DEL", alpha = 0.7)
 ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
 ax4.legend(loc = "upper left")
 
@@ -161,7 +161,7 @@ print(f"{graph_dir}internal_medianlogpvalue.png is saved")
 # the same plot but the y should be 1st quartile.(log_p_value) instead of min(log_p_value)
 
 fig = plt.figure(figsize=(22, 12))
-fig.suptitle(f"1st quartile(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ")
+fig.suptitle(f"1st quartile(log_p_value) vs position:\n num of Bcells = {len(Bcell_IDlist)}\n alpha = {alpha} ", fontsize=20)
 
 ax1 = fig.add_subplot(2, 2, 1)
 ax1.set_title("SNV")
@@ -191,9 +191,9 @@ ax4 = fig.add_subplot(2, 2, 4)
 ax4.set_title("SNV, INS, DEL")
 ax4.set_xlabel("position")
 ax4.set_ylabel("1st quartile(log_p_value)")
-ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_snv["POS"]], label="SNV")
-ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_ins["POS"]], label="INS")
-ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_del["POS"]], label="DEL")
+ax4.scatter(output_snv["POS"], [sorted([output_snv[f"log_P_SNV({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_snv["POS"]], label="SNV", alpha = 0.7)
+ax4.scatter(output_ins["POS"], [sorted([output_ins[f"log_P_INS({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_ins["POS"]], label="INS", alpha = 0.7)
+ax4.scatter(output_del["POS"], [sorted([output_del[f"log_P_DEL({Bcell})"][j] for Bcell in Bcell_IDlist])[len(Bcell_IDlist) // 4] for j in output_del["POS"]], label="DEL", alpha = 0.7)
 ax4.axhline(y=log(alpha) - log(len(Bcell_IDlist)) - log((len(output_snv["POS"]) + len(output_ins["POS"]) + len(output_del["POS"]))), color='r', linestyle='-', label="log(0.05 / len(Bcell_list) / len(all_variant))")
 ax4.legend(loc = "upper left")
 
