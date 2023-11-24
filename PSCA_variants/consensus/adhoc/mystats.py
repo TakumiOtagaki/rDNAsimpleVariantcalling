@@ -1,4 +1,8 @@
-from math import lgamma, gamma, exp, log
+from math import lgamma, gamma, exp, log, floor
+
+from scipy.stats import poisson
+
+# https://mathlandscape.com/poisson-distrib/
 
 def continuous_poisson(x, lambda_):
     return exp(-lambda_) * lambda_**x / gamma(x+1)
@@ -9,6 +13,23 @@ def log_continuous_poisson(x, lambda_):
         return None
     # return -1 * lambda_ + x*log(lambda_) - log(gamma(x+1))
     return x*log(lambda_) - lambda_ - lgamma(x+1)
+
+
+def log_continuous_cumulative_poisson(x, lambda_):
+    # if x is not integer, return None
+    if floor(x) != x:
+        print("x is not integer")
+        return None
+    if lambda_ == 0:
+        # return log(0)
+        return None
+    if x < 0:
+        return 0
+    if x > lambda_: #should use logsf
+        return poisson.logsf(x, lambda_)
+    elif x <= lambda_: #should use logcdf
+        return poisson.logcdf(x, lambda_)
+
 
 
 # test for x, lambda in 0 ~ 1
