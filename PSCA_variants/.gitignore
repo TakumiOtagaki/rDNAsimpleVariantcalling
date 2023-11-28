@@ -4,4 +4,5 @@ consensus/result
 consensus/vcfout
 consensus/bcftools_gatk/
 consensus/freebayes/
-```
+consensus/adhoc/internal_logpvalue*.csv
+consensus/adhoc/POSvsBcell*.csv
