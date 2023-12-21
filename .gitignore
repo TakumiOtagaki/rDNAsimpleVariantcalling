@@ -1,0 +1,8 @@
+result/
+vcfout/
+internal_logpvalue*.csv
+internal_logpvalue.csv
+internal_logpvalue.csv
+internal_logpvalue_DEL.csv
+internal_logpvalue_INS.csv
+internal_logpvalue_SNV.csv
