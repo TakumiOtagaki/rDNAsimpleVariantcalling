@@ -1,0 +1,120 @@
+HG00099	female	SAME123271	GBR	British	EUR	European Ancestry	GBR	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,Geuvadis
+HG00140	male	SAME124396	GBR	British	EUR	European Ancestry	GBR	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release
+HG00280	male	SAME122831	FIN	Finnish	EUR	European Ancestry	FIN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,Geuvadis
+HG00323	female	SAME123795	FIN	Finnish	EUR	European Ancestry	FIN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,Geuvadis
+HG00408	female	SAME123155	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00423	female	SAME122810	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00438	female	SAME125267	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00544	female	SAME124086	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00558	female	SAME124247	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00597	female	SAME125008	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00609	male	SAME125370	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00621	male	SAME123082	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00639	female	SAME123650	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00642	male	SAME123436	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00673	male	SAME123605	CHS	Southern Han Chinese	EAS	East Asian Ancestry	CHS	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00735	female	SAME123042	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00738	male	SAME125368	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG00741	female	SAME124833	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01071	female	SAME123009	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01074	male	SAME124070	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01081	female	SAME125395	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01099	male	SAME123771	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01106	male	SAME123674	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01123	female	SAME1840204	CLM	Colombian	AMR	American Ancestry	CLM	
+HG01175	female	SAME124618	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01192	male	SAME124298	PUR	Puerto Rican	AMR	American Ancestry	PUR	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01255	male	SAME125286	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01258	male	SAME125279	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01261	male	SAME122814	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01346	female	SAME124860	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01358	male	SAME124688	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01361	female	SAME124504	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01433	male	SAME1839252	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38
+HG01496	female	SAME124133	CLM	Colombian	AMR	American Ancestry	CLM	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01884	female	SAME122845	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01891	female	SAME123029	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01928	male	SAME123782	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01934	male	SAME123589	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01943	male	SAME124151	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01952	male	SAME123975	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01975	female	SAME124322	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01978	female	SAME124332	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01981	female	SAME125247	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG01993	female	SAME124741	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02004	female	SAME123620	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02015	male	SAME123447	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02027	male	SAME125318	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02040	male	SAME1839803	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02056	male	SAME124162	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02071	male	SAME123102	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02074	male	SAME123107	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02083	male	SAME124962	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02129	male	SAME1839724	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02132	male	SAME1839889	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02135	male	SAME1839872	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02148	female	SAME1839697	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02155	female	SAME124795	CDX	Dai Chinese	EAS	East Asian Ancestry	CDX	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02165	female	SAME124208	CDX	Dai Chinese	EAS	East Asian Ancestry	CDX	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02257	female	SAME1839326	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02258	male	SAME1839322	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02273	female	SAME1840309	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02280	female	SAME1840096	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02293	female	SAME1839934	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02300	male	SAME1839856	PEL	Peruvian	AMR	American Ancestry	PEL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02451	female	SAME1840138	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02486	male	SAME1839558	ACB	African Caribbean	AFR	African Ancestry	ACB	1000 Genomes phase 3 release
+HG02523	female	SAME1840322	KHV	Kinh Vietnamese	EAS	East Asian Ancestry	KHV	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02559	female	SAME1840052	ACB	African Caribbean	AFR	African Ancestry	ACB	
+HG02572	male	SAME1839570	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02602	male	SAME1840290	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02615	female	SAME1840380	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02622	female	SAME1840185	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02630	female	SAME1839963	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02647	male	SAME1839762	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02683	female	SAME1839298	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG02698	male	SAME1839137	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02717	male	SAME1839976	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02735	male	SAME1839866	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02738	male	SAME1839560	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG02809	female	SAME1840067	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02886	female	SAME1840151	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG02922	female	SAME1839441	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG02965	male	SAME1840116	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38
+HG02976	female	SAME1840223	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03017	male	SAME1839956	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG03041	female	SAME1839620	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG03130	male	SAME1839365	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03139	male	SAME1839468	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03195	female	SAME1839919	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03209	male	SAME1839551	MSL	Mende	AFR	African Ancestry	MSL	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03225	male	SAME1839460	MSL	Mende	AFR	African Ancestry	MSL	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03239	female	SAME1839295	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+HG03453	female	SAME1839750	MSL	Mende	AFR	African Ancestry	MSL	1000 Genomes 30x on GRCh38
+HG03471	male	SAME1839677	MSL	Mende	AFR	African Ancestry	MSL	
+HG03516	female	SAME1840160	ESN	Esan	AFR	African Ancestry	ESN	1000 Genomes 30x on GRCh38
+HG03540	female	SAME1839745	GWD	Gambian Mandinka	AFR	African Ancestry	GWD	1000 Genomes 30x on GRCh38
+HG03579	male	SAME1839247	MSL	Mende	AFR	African Ancestry	MSL	1000 Genomes 30x on GRCh38
+HG03654	male	SAME1839513	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG03669	female	SAME1839345	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG03688	male	SAME1840265	STU	Tamil	SAS	South Asian Ancestry	STU	1000 Genomes 30x on GRCh38
+HG03704	female	SAME1840040	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG03710	male	SAME1839891	PJL	Punjabi	SAS	South Asian Ancestry	PJL	1000 Genomes 30x on GRCh38
+HG03831	female	SAME1839348	BEB	Bengali	SAS	South Asian Ancestry	BEB	1000 Genomes 30x on GRCh38
+HG03834	female	SAME1839269	BEB	Bengali	SAS	South Asian Ancestry	BEB	1000 Genomes 30x on GRCh38
+HG03927	female	SAME1839035	BEB	Bengali	SAS	South Asian Ancestry	BEB	1000 Genomes 30x on GRCh38
+HG03942	male	SAME1840356	BEB	Bengali	SAS	South Asian Ancestry	BEB	1000 Genomes 30x on GRCh38
+HG04115	male	SAME1839362	STU	Tamil	SAS	South Asian Ancestry	STU	1000 Genomes 30x on GRCh38
+HG04184	female	SAME1840049	BEB	Bengali	SAS	South Asian Ancestry	BEB	1000 Genomes 30x on GRCh38
+HG04199	male	SAME1839840	STU	Tamil	SAS	South Asian Ancestry	STU	1000 Genomes 30x on GRCh38
+HG04204	male	SAME1839437	STU	Tamil	SAS	South Asian Ancestry	STU	1000 Genomes 30x on GRCh38
+HG04228	male	SAME1839161	STU	Tamil	SAS	South Asian Ancestry	STU	1000 Genomes 30x on GRCh38
+NA18522	male	SAME124669	YRI	Yoruba	AFR	African Ancestry	YRI	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release
+NA18612	male	SAME125036	CHB	Han Chinese	EAS	East Asian Ancestry	CHB	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,90 Han Chinese high coverage genomes
+NA18747	male	SAME123916	CHB	Han Chinese	EAS	East Asian Ancestry	CHB	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release
+NA18971	male	SAME123763	JPT	Japanese	EAS	East Asian Ancestry	JPT	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release
+NA18983	male	SAME125074	JPT	Japanese	EAS	East Asian Ancestry	JPT	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release
+NA19043	male	SAME125243	LWK	Luhya	AFR	African Ancestry	LWK	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
+NA20752	male	SAME124177	TSI	Toscani	EUR	European Ancestry	TSI	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,Geuvadis
+NA20805	male	SAME125361	TSI	Toscani	EUR	European Ancestry	TSI	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release,1000 Genomes phase 1 release,Geuvadis
+NA20905	male	SAME122915	GIH	Gujarati	SAS	South Asian Ancestry	GIH	1000 Genomes on GRCh38,1000 Genomes 30x on GRCh38,1000 Genomes phase 3 release
