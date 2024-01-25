@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 min_rlen = 9000
 reflen = 13332
 
-HGNA_IDlist_file = "/nfs/data05/otgk/rDNA/HG_IDlist.txt"
+HGNA_IDlist_file = "/large/otgk/rDNA/HG_IDlist.txt"
 HGNA_IDlist = []
 with open(HGNA_IDlist_file, "r") as f:
     for line in f:
@@ -41,14 +41,13 @@ for j in output_del["POS"]:
     first_q_dict[(j, "DEL")] = sorted([-1 * output_del[f"log_P_DEL({HGNA})"][j] for HGNA in HGNA_IDlist])[len(HGNA_IDlist) // 4]
 
 # snv, ins, del を合わせてから、そのうち -log の値が最も大きいようなものから順番に全体の 10 % (13332 * 3 * 0.1 = 4000) を取り出す。
-# 出力するのは、SNV or INS or DEL と、position j の値でOK.
+# 出力するのは、SNV or INS or DEL と、position j と -log の値
 
 first_q_dict_sorted = sorted(first_q_dict.items(), key=lambda x: x[1], reverse=True)
 first_q_dict_sorted = first_q_dict_sorted[:5000]
 
-first_q_dict_sorted = [x[0] for x in first_q_dict_sorted]
 
 # ファイルに書き出す
 with open(f"{output_file_prefix}first_q_dict_sorted.txt", "w") as f:
     for x in first_q_dict_sorted:
-        f.write(f"{x[0]},{x[1]}\n")
+        f.write(f"{x[0][0]},{x[0][1]},{x[1]}\n")
